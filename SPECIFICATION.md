@@ -1,10 +1,30 @@
-This project is to prototype an asset tree management app. The goal of the app is to provide a hierarchical view of physical assets such as buildings, vehicles, or industrial systems. 
+This project is to prototype an asset maintenance management app for physical assets, such as vehicles, buildings, or industrial machinery.
 
-The overideing deisgn philosophy is a recursive tree structure, where nodes represent assets and their sub-assets. The nodes are identical at every level, and can have any number of nodes as children. This is similar to a file tree, except the containers (nodes) also have a data card showing any number of properties of the node itself at that point. This is all done with a single component, the Tree Node component. 
+The overiding design philosophy is a recursive tree structure, where nodes represent assets and their sub-assets. The nodes are identical at every level, and can have any number of nodes as children. This is similar to a file tree, except the containers (nodes) also have a Data Card showing any number of properties of the node itself at that point. This is all done with a single component, the TreeNode component. 
 
-A second goal is "self-construction", which means the users of the app create and edit the assets and their structure themselves. 
+A second goal is "self-construction", which means the users of the app create and edit the Assets,their structure, and their data attributes themselves. 
 
-A third goal is modeless or in-situ editing, which means the users can edit the assets, their structure, and all data card properties without having to leave the tree view.
+A third goal is modeless in-situ editing, which means the users can edit the Assets, their structure, and all data card properties without having to leave the tree view or enter any separate editing mode.
+
+The overarching user experience and purpose is that users freely CREATE the structure and details of the Assets, freely EDIT that structure and easily BROWSE through that structure to see all the parts and details added by themselves and other users.
+
+The ROOT of the tree is the home page of the App, where users see all the Assets already created and can add new ones.
+
+The NODES of the tree are Assets and Sub-Assets which are essentially the same. Each Asset and Sub-Asset can have any number of Sub-Assets. 
+
+Each Asset has exactly one Data Card, which can have any number of Data Fields.
+
+Data Fields show specific information about their Asset, such as part number or voltage or size. Users can add any number of predefined or custom Data Fields to any Data Card. Users can freely edit the VALUES of any Data Field on any Data Card at any time.
+
+Data Fields each have a Details section (normally hidden), which contains history and metadata for that Data Field.
+
+The design also follows mobile-first interaction and styling principles, offline-first data principles, and serverless or JAMSTACK technology principles.
+
+The interaction model is meant to be as simple and intuitive as possible, with vertical-only scrolling, single-tap and double-tap interactions.
+
+Modeless, Stateless, Diegetic, In-Situ, Secretless, Dependency-Light, User Facing, User First, Offline-First, Interaction Redundant, Data Self-Containment, Context Self-Containment, Feedback Forward, 12 Factor, S.O.L.I.D., Type Safe, Memory Safe, Cached, Indexed, Data Redundant, Data Pure, Data Consistent, Data Atomic, Data Historic, Data Archivable, Accessible, Input Hoovering / Crowdsourcing, 
+
+**Data Schema**
 
 ```typescript
 // TreeNode DB Schema
@@ -49,10 +69,88 @@ interface DataFieldRecord {
 }
 ```
 
-**Templates**
+**Component Specification** Visual and functional description of the components' UI and UX.
 
-**Default Data Fields**
-- "Description" (string)
-- "Hash Tags" (array of strings)
-- "Type Of" (classifiaction) 
+*ROOT view*
+- List of TreeNode instances in isRoot state
+- "Create New Asset" button
+
+*ASSET view*
+- A dynamic route, using the top level TreeNode's nodeName as the route parameter.
+- One TreeNode instance at the top in isParent state
+- List of child TreeNode instances in isChild state
+- "Create New Sub-Asset Here" button
+
+*TreeNode component*
+- NodeTitle component (props: ancestorNamePath)
+- NodeSubtitle component (props: nodeSubtitle)
+- DataCard (props: dataFields{})
+- CardExpandButton (props: isExpanded)
+
+*NodeTitle component*
+- Displays the ancestorNamePath plus the current nodeName in a a single line seperated by slashes / ending / with / the / current / nodeName (in bold).
+
+*NodeSubtitle component*
+- Displays the nodeSubtitle, a simple user-entered string sucha as an asset description or a location.
+
+*CardExpandButton component*
+- Displays a chevron that opens and closes the DataCard
+
+*DataCard component*
+- DataField components (props: DataFieldRecord) 
+- “Add New Field” button at the bottom of the DataCard
+
+*DataField component* 
+- The simplest DataField is a label: value pair, but some are more complex. 
+- User editable value, double tap to edit the value
+- They all have a "Details" caret which opens the DataFieldDetails component with history, metadata, and delete feature.
+
+*DataFieldDetails component*
+- Displays the history, metadata, delete feature.
+
+**TreeNode States**
+- isRoot
+- isParent
+- isChild
+- isCardExpanded
+- isUnderConstruction
+
+*state transitions*
+- isRoot -> isParent
+- isChild -> isParent
+- isParent -> isRoot
+- isUnderConstruction -> isParent
+
+**Features**
+
+*Create New TreeNode*
+- When the user taps the "Create New Asset" or "Create New Sub-Asset Here" button, a new TreeNode is created, and the user is taken to the ASSET view for the new TreeNode.
+- The new TreeNode is in isUnderConstruction state, which means the nodeName and nodeSubtitle need to be entered.
+- In isUnderConstruction state, the DataCard consists of drop-down menus, in several categories, for the user to select any number of Data Field and Data Field templates for inclusion on the new node's DataCard.
+- In isUnderConstruction state, the DataCard has "Create" and "Cancel" buttons. They do just what they say on the tin.
+
+*Adding Data Fields at node creation time*
+- At node creation time, the user is offered all available DataFields to select with a simple checkbox for inclusion on the new node's DataCard.
+These are organised into categories, which can be expanded to show the DataFields they contain.
+
+*Templates* 
+Templates are simply collections of DataFields. When a new node is created, the user is offered a selection of templates. 
+for the node being created. Each template offering can itself be expanded to show the DataFields it contains, which can also be individually deselected.
+
+*Create New DataField*
+- When adding a new Data Field, the last option is "Create a new Data Field". This opens a form (in situ) for creating a totally new Data Field. These are stored in the DataField Library for future use by all users, appearing in the drop-down menus at node creation time.
+
+*Data Field Library*
+- The Data Field Library is a collection of all DataFields created by all users.
+
+*"Add Data Field" button*
+- When the user taps the "Add Data Field" button at the bottom of the DataCard, an area expands showing a choice from all available DataFields, in several expandable categories, to select with simple checkboxes.
+- The user can then tap the "Add" button to add the selected Data Field to the DataCard, or the "Cancel" button to close the area.
+
+
+*Default Data Fields* Default at creation time, but can be deselected.
+- "Asset Node Metadata"
+- "Description"
+- "Hash Tags"
+- "Type Of" 
 - "Status"
