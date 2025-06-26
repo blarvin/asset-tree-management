@@ -1,30 +1,31 @@
-This project is to prototype an asset maintenance management app for physical assets, such as vehicles, buildings, or industrial machinery.
+# Asset Tree Management Specification
 
-The overiding design philosophy is a recursive tree structure, where nodes represent assets and their sub-assets. The nodes are identical at every level, and can have any number of nodes as children. This is similar to a file tree, except the containers (nodes) also have a Data Card showing any number of properties of the node itself at that point. This is all done with a single component, the TreeNode component. 
+## Overview
+Asset maintenance management app for physical assets (vehicles, buildings, industrial machinery) using a recursive tree structure where nodes represent assets and sub-assets.
 
-A second goal is "self-construction", which means the users of the app create and edit the Assets,their structure, and their data attributes themselves. 
+## Core Principles
+- **Recursive Tree Structure**: Single TreeNode component handles all levels
+- **Self-Construction**: Users create and edit assets, structure, and attributes
+- **Modeless In-Situ Editing**: Edit without leaving tree view or entering edit modes
+- **Mobile-First**: Vertical scrolling, single/double-tap interactions
+- **Offline-First Data**: Local-first with sync capabilities
+- **JAMStack Architecture**: Serverless deployment
 
-A third goal is modeless in-situ editing, which means the users can edit the Assets, their structure, and all data card properties without having to leave the tree view or enter any separate editing mode.
+## Technical Stack
+- **Framework**: Lit 3.3.0 web components
+- **Language**: TypeScript with strict mode
+- **Build**: Vite 6.3.5 library mode
+- **Documentation**: Storybook 9.0.11
+- **Routing**: Dynamic routes using nodeName parameters
+- **Data**: indexedDB
 
-The overarching user experience and purpose is that users freely CREATE the structure and details of the Assets, freely EDIT that structure and easily BROWSE through that structure to see all the parts and details added by themselves and other users.
+## Tree Structure
+- **ROOT**: Home page showing all top-level assets
+- **NODES**: Assets and sub-assets (identical structure at every level)
+- **DATA CARDS**: Each node has one card with multiple data fields
+- **DATA FIELDS**: Key-value pairs with history and metadata
 
-The ROOT of the tree is the home page of the App, where users see all the Assets already created and can add new ones.
-
-The NODES of the tree are Assets and Sub-Assets which are essentially the same. Each Asset and Sub-Asset can have any number of Sub-Assets. 
-
-Each Asset has exactly one Data Card, which can have any number of Data Fields.
-
-Data Fields show specific information about their Asset, such as part number or voltage or size. Users can add any number of predefined or custom Data Fields to any Data Card. Users can freely edit the VALUES of any Data Field on any Data Card at any time.
-
-Data Fields each have a Details section (normally hidden), which contains history and metadata for that Data Field.
-
-The design also follows mobile-first interaction and styling principles, offline-first data principles, and serverless or JAMSTACK technology principles.
-
-The interaction model is meant to be as simple and intuitive as possible, with vertical-only scrolling, single-tap and double-tap interactions.
-
-
-
-**Data Schema**
+## Data Schema
 
 ```typescript
 // TreeNode DB Schema
@@ -69,94 +70,51 @@ interface DataFieldRecord {
 }
 ```
 
-**Component Specification** Visual and functional description of the components' UI and UX.
+## Component Architecture
 
-*ROOT view*
-- List of TreeNode instances in isRoot state
-- "Create New Asset" button
+### Views
+- **ROOT View**: List of top-level TreeNodes + "Create New Asset" button
+- **ASSET View**: Dynamic route showing parent TreeNode + child TreeNodes + "Create New Sub-Asset Here" button
 
-*ASSET view*
-- A dynamic route, using the top level TreeNode's nodeName as the route parameter.
-- One TreeNode instance at the top in isParent state
-- List of child TreeNode instances in isChild state
-- "Create New Sub-Asset Here" button
+### Core Components
+- **TreeNode**: Main component with NodeTitle, NodeSubtitle, DataCard, CardExpandButton
+- **NodeTitle**: Displays ancestorNamePath/nodeName (current node in bold)
+- **NodeSubtitle**: Simple description or location string
+- **CardExpandButton**: Chevron to expand/collapse DataCard
+- **DataCard**: Contains DataFields + "Add New Field" button + metadata section
+- **DataField**: Label:value pairs with expandable Details section (history, metadata, delete)
+- **DataFieldMetadata**: Value history, edit history, creation details, etc. (isExpanded, isHidden)
+- **CreateNewTreeNode**: Button to create a new TreeNode. Has two states: isRoot, label "Create New Asset" and isChild, label "Create New Sub-Asset Here"
+- **AddDataField**: Button to create a new DataField.
+- **"Up" Button**: On the left end of isParent nodes. Navigates up the tree, to the parent of the current node.
 
-*TreeNode component*
-- NodeTitle component (props: ancestorNamePath)
-- NodeSubtitle component (props: nodeSubtitle)
-- DataCard (props: dataFields{})
-- CardExpandButton (props: isExpanded)
+## TreeNode States
+- **isRoot**: Top-level nodes on home page
+- **isParent**: Current node being viewed with children
+- **isChild**: Child nodes under current parent
+- **isCardExpanded**: DataCard is open/closed
+- **isUnderConstruction**: New node requiring setup
 
-*NodeTitle component*
-- Displays the ancestorNamePath plus the current nodeName in a a single line seperated by slashes / ending / with / the / current / nodeName (in bold).
+### State Transitions
+- isRoot → isParent (navigate to ASSET VIEW)
+- isChild → isParent (navigate deeper)
+- isParent → isRoot (navigate to home using "Up" button)
+- isUnderConstruction → isParent (complete setup)
 
-*NodeSubtitle component*
-- Displays the nodeSubtitle, a simple user-entered string sucha as an asset description or a location.
+## User Experience pathways
 
-*CardExpandButton component*
-- Displays a chevron that opens and closes the DataCard
+### Node Creation
+- **"Create New Asset" button**: Creates a new TreeNode in isUnderConstruction state, at the current location in the tree.
+- **New TreeNode Construction UI**: In isUnderConstruction state, user must enter nodeName and nodeSubtitle in their respective places on the main TreeNode, and the default DataField values in the DataCard.
+- **New TreeNode DataField Construction UI**: Dropdown menus for selecting DataFields (in several categories) and templates (pre defined sets of DataFields)
+- **Actions**: Create/Cancel buttons to finalize or abort the creation of the new TreeNode.
 
-*DataCard component*
-- DataField components (props: DataFieldRecord) 
-- “Add New Field” button at the bottom of the DataCard
-- "Asset Node Metadata" expandable section at the bottom of the DataCard
+### DataField Management
+- **Add Data Field**: A "+" button at bottom of DataCard, expands an area with a list of DataFields to choose from (in several categories).
+- **Data Field Details**: To the right of each DataField there is a chevron button, which expands a section with metadata, a delete button, and a few more features for the associated DataField.
 
-*DataField component* 
-- The simplest DataField is a label: value pair, but some are more complex. 
-- User editable value, double tap to edit the value
-- They all have a "Details" caret which opens the DataFieldDetails component with history, metadata, and delete feature.
 
-*DataFieldMetadata component* A section that can be expanded below every DataField, which displays the history, metadata, delete feature, and more.
-- Value History {object}
-- Edited By History {object}
-- Created By
-- Created At
-
-**TreeNode States**
-- isRoot
-- isParent
-- isChild
-- isCardExpanded
-- isUnderConstruction
-
-*state transitions*
-- isRoot -> isParent (ASSET VIEW)
-- isChild -> isParent (ASSET VIEW)
-- isParent -> isRoot (ROOT VIEW)
-- isUnderConstruction -> isParent (ASSET VIEW)
-
-**Features**
-
-*Create New TreeNode*
-- When the user taps the "Create New Asset" or "Create New Sub-Asset Here" button, a new TreeNode is created, and the user is taken to the ASSET VIEW for the new TreeNode.
-- The new TreeNode is in isUnderConstruction state, which means the nodeName and nodeSubtitle need to be entered.
-- In isUnderConstruction state, the DataCard consists of drop-down menus, in several categories, for the user to select any number of Data Field and Data Field templates for inclusion on the new node's DataCard.
-- In isUnderConstruction state, the DataCard has "Create" and "Cancel" buttons. They do just what they say on the tin.
-
-*Adding Data Fields at node creation time*
-- At node creation time, the user is offered all available DataFields to select with a simple checkbox for inclusion on the new node's DataCard.
-These are organised into categories, which can be expanded to show the DataFields they contain.
-
-*Templates* 
-Templates are simply collections of DataFields. When a new node is created, the user is offered a selection of templates. 
-for the node being created. Each template offering can itself be expanded to show the DataFields it contains, which can also be individually deselected.
-
-*Create New DataField*
-- When adding a new Data Field, the last option is "Create a new Data Field". This opens a form (in situ) for creating a totally new Data Field. These are stored in the DataField Library for future use by all users, appearing in the drop-down menus at node creation time.
-
-*Data Field Library*
-- The Data Field Library is meant to be a sort of "crowd-sourced" collection of all DataFields created by all users.
-
-*"Add Data Field" button*
-- When the user taps the "Add Data Field" button at the bottom of the DataCard, an area expands showing a choice from all available DataFields, in several expandable categories, to select with simple checkboxes.
-- The user can then tap the "Add" button to add the selected Data Field to the DataCard, or the "Cancel" button to close the area.
-
-*Default Data Fields* Default at creation time, but can be deselected.
-- "Description"
-- "Type Of" 
-- "Hash Tags"
-
-*Data Field and Value Examples*
+## Example DataFields
 - Location: 123 Main St, Anytown, USA
 - Part Description: Soft Start Motor Controller, 3 phase
 - Serial Number: 1234567890
@@ -168,18 +126,17 @@ for the node being created. Each template offering can itself be expanded to sho
 - Mount: NEMA 12
 - Shaft Diameter: 1.50 inches
 - Shaft Key: woodruff, 3.5mm
-- Installed Date: 2025-01-01
 - Color: Red
+- Installed Date: 2025-01-01
 - Status: In Service
-- Notes: This is a note about the asset.
-- Image: https://example.com/image.jpg
 - Voltage Rating: 120V
 - Current Rating: 10A
 - Current Reading: 5.4 amps, on 2025-01-01
 - Power Rating: 1200W
+- Frequency: 60Hz
+- Phase: 3-Phase
 - Poles: 4
 - Insulation Class: B
 - Insulation Resistance: 100MΩ
-- Frequency: 60Hz
-- Phase: 3-Phase
- 
+- Notes: This is a note about the asset.
+- Image: https://example.com/image.jpg
