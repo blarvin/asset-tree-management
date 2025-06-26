@@ -25,6 +25,17 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - **DATA CARDS**: Each node has one card with multiple data fields
 - **DATA FIELDS**: Key-value pairs with history and metadata
 
+## Pages and URL Structure
+- / for ROOT view
+- /asset/[Top_Level_Asset_Name] for ASSET view (drill down within that asset)
+
+#### Navigation Logic:
+
+- URLs: Only for top-level assets (vehicles, buildings, machines)
+- Sub-navigation: All handled client-side within the asset view
+- Up button: Just navigates within the current asset's tree structure
+- Breadcrumbs: Show full path but only top-level has a URL
+
 ## Data Schema
 
 ```typescript
@@ -83,17 +94,23 @@ interface DataFieldRecord {
 - **CardExpandButton**: Chevron to expand/collapse DataCard
 - **DataCard**: Contains DataFields + "Add New Field" button + metadata section
 - **DataField**: Label:value pairs with expandable Details section (history, metadata, delete)
-- **DataFieldMetadata**: Value history, edit history, creation details, etc. (isExpanded, isHidden)
+- **DataFieldMetadata**: Value history, edit history, creation details, etc. and a delete feature for the DataField.
 - **CreateNewTreeNode**: Button to create a new TreeNode. Has two states: isRoot, label "Create New Asset" and isChild, label "Create New Sub-Asset Here"
 - **AddDataField**: Button to create a new DataField.
-- **"Up" Button**: On the left end of isParent nodes. Navigates up the tree, to the parent of the current node.
+- **"Up" Button**: On the left end of isParent nodes. Navigates up the tree using parentId to find the parent node. If parentId is "ROOT", navigates to home page.
+
 
 ## TreeNode States
-- **isRoot**: Top-level nodes on home page
-- **isParent**: Current node being viewed with children
-- **isChild**: Child nodes under current parent
-- **isCardExpanded**: DataCard is open/closed
-- **isUnderConstruction**: New node requiring setup
+- **isRoot**: Top-level nodes on home page. Full width, no children shown, no "Up" button, abbreviated DataCard (first 6 DataFields, or all if fewer than 6). CardExpandButton shows "..." to indicate more fields available.
+- **isParent**: Current node being viewed with children. Full width, children shown, "Up" button, full DataCard.
+- **isChild**: Child nodes under current parent. Narrower (indented) on the left, no children shown, no "Up" button, full DataCard.
+- **isUnderConstruction**: New node requiring setup. Same width and appearance of isParent.
+
+## DataCard States
+- **isCardExpanded**: DataCard is open/closed. Persisted to local storage.
+
+## DataField States
+- **isDetailsExpanded**: DataFieldDetails is expanded/collapsed. Persisted to local storage.
 
 ### State Transitions
 - isRoot → isParent (navigate to ASSET VIEW)
@@ -105,14 +122,35 @@ interface DataFieldRecord {
 
 ### Node Creation
 - **"Create New Asset" button**: Creates a new TreeNode in isUnderConstruction state, at the current location in the tree.
-- **New TreeNode Construction UI**: In isUnderConstruction state, user must enter nodeName and nodeSubtitle in their respective places on the main TreeNode, and the default DataField values in the DataCard.
-- **New TreeNode DataField Construction UI**: Dropdown menus for selecting DataFields (in several categories) and templates (pre defined sets of DataFields)
+- **New TreeNode Construction UI**: In isUnderConstruction state, user must enter nodeName and nodeSubtitle in their respective places on the main TreeNode, and fill in the default DataField values in the DataCard.
+- **New TreeNode DataField Construction UI**: Dropdown menus for selecting DataFields organized in categories: "Identification" (part numbers, serial numbers), "Physical" (dimensions, weight, color), "Operational" (voltage, status, readings), "Documentation" (notes, images, manuals), and templates (pre defined sets of DataFields)
 - **Actions**: Create/Cancel buttons to finalize or abort the creation of the new TreeNode.
 
+### Default DataFields
+- "Description": A short description of the asset.
+- "Type Of": Such as "Vehicle", "Building", "Machine", "Equipment", "Tool", "Other".
+- "Tags": A list of tags that can be used to search for the asset.
+
 ### DataField Management
-- **Add Data Field**: A "+" button at bottom of DataCard, expands an area with a list of DataFields to choose from (in several categories).
+- **Double-Tap to edit**: Double-tap on a DataField value to replace it with an input field. Save with Enter key or by clicking outside. Cancel with Escape key.
+- **Add Data Field**: A "+" button at bottom of DataCard, expands an area with DataFields organized in categories: "Identification", "Physical", "Operational", "Documentation".
 - **Data Field Details**: To the right of each DataField there is a chevron button, which expands a section with metadata, a delete button, and a few more features for the associated DataField.
 
+### Empty State
+- Default welcome message "Create a new asset to get started"
+- "Create New Asset" button
+
+### DataField Library
+- **It's a node!**: Just like the other nodes, using the same TreeNode component.
+- **Crowd-Sourced**: When a user creates a new DataField, it is added to the DataField Library.
+- **Reusability**: Available across all users and nodes
+- **Initial library**: Default DataFields plus examples from below.
+
+## Phase 1 Prototyping Simplifications
+- **Skip virtualParents**: Focus on basic parent-child relationships only
+- **Skip DataField Library as separate node**: Use hardcoded list of available DataFields  
+- **Skip complex state persistence**: Use basic localStorage for expanded states
+- **Skip templates**: Focus on individual DataField selection only
 
 ## Example DataFields
 - Location: 123 Main St, Anytown, USA
