@@ -22,7 +22,7 @@ The design also follows mobile-first interaction and styling principles, offline
 
 The interaction model is meant to be as simple and intuitive as possible, with vertical-only scrolling, single-tap and double-tap interactions.
 
-Modeless, Stateless, Diegetic, In-Situ, Secretless, Dependency-Light, User Facing, User First, Offline-First, Interaction Redundant, Data Self-Containment, Context Self-Containment, Feedback Forward, 12 Factor, S.O.L.I.D., Type Safe, Memory Safe, Cached, Indexed, Data Redundant, Data Pure, Data Consistent, Data Atomic, Data Historic, Data Archivable, Accessible, Input Hoovering / Crowdsourcing, 
+
 
 **Data Schema**
 
@@ -99,14 +99,18 @@ interface DataFieldRecord {
 *DataCard component*
 - DataField components (props: DataFieldRecord) 
 - “Add New Field” button at the bottom of the DataCard
+- "Asset Node Metadata" expandable section at the bottom of the DataCard
 
 *DataField component* 
 - The simplest DataField is a label: value pair, but some are more complex. 
 - User editable value, double tap to edit the value
 - They all have a "Details" caret which opens the DataFieldDetails component with history, metadata, and delete feature.
 
-*DataFieldDetails component*
-- Displays the history, metadata, delete feature.
+*DataFieldMetadata component* A section that can be expanded below every DataField, which displays the history, metadata, delete feature, and more.
+- Value History {object}
+- Edited By History {object}
+- Created By
+- Created At
 
 **TreeNode States**
 - isRoot
@@ -116,15 +120,15 @@ interface DataFieldRecord {
 - isUnderConstruction
 
 *state transitions*
-- isRoot -> isParent
-- isChild -> isParent
-- isParent -> isRoot
-- isUnderConstruction -> isParent
+- isRoot -> isParent (ASSET VIEW)
+- isChild -> isParent (ASSET VIEW)
+- isParent -> isRoot (ROOT VIEW)
+- isUnderConstruction -> isParent (ASSET VIEW)
 
 **Features**
 
 *Create New TreeNode*
-- When the user taps the "Create New Asset" or "Create New Sub-Asset Here" button, a new TreeNode is created, and the user is taken to the ASSET view for the new TreeNode.
+- When the user taps the "Create New Asset" or "Create New Sub-Asset Here" button, a new TreeNode is created, and the user is taken to the ASSET VIEW for the new TreeNode.
 - The new TreeNode is in isUnderConstruction state, which means the nodeName and nodeSubtitle need to be entered.
 - In isUnderConstruction state, the DataCard consists of drop-down menus, in several categories, for the user to select any number of Data Field and Data Field templates for inclusion on the new node's DataCard.
 - In isUnderConstruction state, the DataCard has "Create" and "Cancel" buttons. They do just what they say on the tin.
@@ -141,16 +145,41 @@ for the node being created. Each template offering can itself be expanded to sho
 - When adding a new Data Field, the last option is "Create a new Data Field". This opens a form (in situ) for creating a totally new Data Field. These are stored in the DataField Library for future use by all users, appearing in the drop-down menus at node creation time.
 
 *Data Field Library*
-- The Data Field Library is a collection of all DataFields created by all users.
+- The Data Field Library is meant to be a sort of "crowd-sourced" collection of all DataFields created by all users.
 
 *"Add Data Field" button*
 - When the user taps the "Add Data Field" button at the bottom of the DataCard, an area expands showing a choice from all available DataFields, in several expandable categories, to select with simple checkboxes.
 - The user can then tap the "Add" button to add the selected Data Field to the DataCard, or the "Cancel" button to close the area.
 
-
 *Default Data Fields* Default at creation time, but can be deselected.
-- "Asset Node Metadata"
 - "Description"
-- "Hash Tags"
 - "Type Of" 
-- "Status"
+- "Hash Tags"
+
+*Data Field and Value Examples*
+- Location: 123 Main St, Anytown, USA
+- Part Description: Soft Start Motor Controller, 3 phase
+- Serial Number: 1234567890
+- Part Number: 1234567890
+- Manufacturer: Acme Inc.
+- Model: Model 123
+- Weight: 100lbs
+- Dimensions: 10x10x10
+- Mount: NEMA 12
+- Shaft Diameter: 1.50 inches
+- Shaft Key: woodruff, 3.5mm
+- Installed Date: 2025-01-01
+- Color: Red
+- Status: In Service
+- Notes: This is a note about the asset.
+- Image: https://example.com/image.jpg
+- Voltage Rating: 120V
+- Current Rating: 10A
+- Current Reading: 5.4 amps, on 2025-01-01
+- Power Rating: 1200W
+- Poles: 4
+- Insulation Class: B
+- Insulation Resistance: 100MΩ
+- Frequency: 60Hz
+- Phase: 3-Phase
+ 
