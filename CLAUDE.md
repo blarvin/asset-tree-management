@@ -53,3 +53,6 @@ When creating new components:
 2. Keep CSS scoped within the component using Lit's `css` template literal
 3. Follow the existing story structure in `stories/` directory
 4. Maintain the minimal, clean approach established in the project
+
+## Storybook Notes
+- `import {action} from 'storybook/actions'` is included, no need for `'addon-actions'`

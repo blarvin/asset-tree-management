@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import './create-new-tree-node.js';
 
 @customElement('root-view')
 export class RootView extends LitElement {
@@ -35,9 +36,14 @@ export class RootView extends LitElement {
     return html`
       <div class="content">
         <slot></slot>
+        <create-new-tree-node isRoot @create-node=${this._handleCreateNode}></create-new-tree-node>
       </div>
       <div class="root-label">root-component</div>
     `;
+  }
+
+  private _handleCreateNode(event: CustomEvent) {
+    console.log('Create node event:', event.detail);
   }
 }
 
