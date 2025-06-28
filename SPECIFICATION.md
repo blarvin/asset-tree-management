@@ -17,26 +17,7 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - **Build**: Vite 6.3.5 library mode
 - **Documentation**: Storybook 9.0.11
 - **Routing**: Dynamic routes using nodeName parameters
-- **Data**: indexedDB
-
-## Tree Structure
-- **ROOT**: Home page showing all top-level assets
-- **NODES**: Assets and sub-assets (identical structure at every level)
-- **DATA CARDS**: Each node has one card with multiple data fields
-- **DATA FIELDS**: Key-value pairs with history and metadata
-- **NODE METADATA**: History and metadata for the node, such as createdBy, createdAt, updatedBy, updatedAt, etc.
-
-## Pages and URL Structure
-- / for ROOT view
-- /asset/[Top_Level_Asset_Name] for ASSET view (drill down within that asset)
-
-#### Navigation Logic:
-
-- URLs: Only for top-level assets (vehicles, buildings, machines)
-- Sub-navigation: All handled client-side within the asset view
-- Up button: Just navigates within the current asset's tree structure
-- Breadcrumbs: Show full path but only top-level has a URL
-
+- **Data**: indexedDB persists the node TreeNode and DataField data.
 
 ## Component Architecture
 
@@ -46,16 +27,23 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 
 ### Core Components
 - **TreeNode**: Main component with NodeTitle, NodeSubtitle, DataCard, CardExpandButton
-- **NodeTitle**: Displays ancestorNamePath/nodeName (current node in bold)
+- **NodeTitle**: Displays breadcrumb path "Ancestor1 / Ancestor2 / Parent / **CurrentNode**" (current node in bold). Parsed from ancestorNamePath string using
+  "|" delimiter, with isRoot nodes showing only nodeName.
 - **NodeSubtitle**: Simple description or location string
-- **CardExpandButton**: Chevron to expand/collapse DataCard
+- **CardExpandButton**: Simple chevron to expand/collapse DataCard
 - **DataCard**: Contains DataFields + "Add New Field" button + metadata section
 - **DataField**: Label:value pairs with expandable Details section (history, metadata, delete)
 - **DataFieldMetadata**: Value history, edit history, creation details, etc. and a delete feature for the DataField.
-- **CreateNewTreeNode**: Button to create a new TreeNode. Has two states: isRoot, label "Create New Asset" and isChild, label "Create New Sub-Asset Here"
-- **AddDataField**: Button to create a new DataField.
+- **CreateNewTreeNode**: Button to create a new TreeNode. Has two states: isRoot: label "Create New Asset" and isChild: label "Create New Sub-Asset Here"
+- **AddDataField**: Button at the bottom of the DataCard to create a new DataField.
 - **"Up" Button**: On the left end of isParent nodes. Navigates up the tree using parentId to find the parent node. If parentId is "ROOT", navigates to home page.
 
+## Tree Structure and component visual hierarchy
+- **ROOT**: Home page showing top-level "Assets". Basically a listView of slim, full-width TreeNodes with a few pixels of vertical space between.
+- **NODES**: Assets and sub-assets (identical structure at every level). The element has two rows of content; the NodeTitle and the NodeSubtitle. Next to the NodeSubtitle is a CardExpandButton (chevron). On the ROOT view instances are in isRoot state, appearing as full-width slim rows in a listView. The ASSET view is also a basic vertical listView of one isParent instance and any number of isChild instances. The parent is a bit chunkier and has an "Up" button at the left to navigate up the tree. Below an isParent instance (still in the ASSET view) are the child nodes, in isChild state. These are the sub-assets of the currently selected asset. IsChild instances are 85% width, indented on the left, and cannot display their own children. 
+- **DATA CARDS**: Each node has one card containing a vertical listView of multiple data field rows. For all three TreeNode states, the DataCard is 85% of the width. It slides down / up to open and close with a CardExpandButton (chevron).
+- **DATA FIELDS**: The basic DataField is a row item with a label and a value. To the right of the value is a chevron button, which expands a NodeMetadata section with metadata, a delete button, and a few more features for the associated DataField. This area expands downwards and is 95% of the width of the DataCard, and shaded for visual separation.
+- **NODE METADATA**: History and metadata for the node, such as createdBy, createdAt, updatedBy, updatedAt, etc. 
 
 ## TreeNode States
 - **isRoot**: Top-level nodes on home page. Full width, no children shown, no "Up" button, abbreviated DataCard (first 6 DataFields, or all if fewer than 6). CardExpandButton shows "..." to indicate more fields available.
@@ -83,19 +71,26 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - **New TreeNode DataField Construction UI**: Dropdown menus for selecting DataFields organized in categories: "Identification" (part numbers, serial numbers), "Physical" (dimensions, weight, color), "Operational" (voltage, status, readings), "Documentation" (notes, images, manuals), and templates (pre defined sets of DataFields)
 - **Actions**: Create/Cancel buttons to finalize or abort the creation of the new TreeNode.
 
-### Default DataFields
-- "Description": A short description of the asset.
-- "Type Of": Such as "Vehicle", "Building", "Machine", "Equipment", "Tool", "Other".
-- "Tags": A list of tags that can be used to search for the asset.
-
 ### DataField Management
 - **Double-Tap to edit**: Double-tap on a DataField value to replace it with an input field. Save with Enter key or by clicking outside. Cancel with Escape key.
 - **Add Data Field**: A "+" button at bottom of DataCard, expands an area with DataFields organized in categories: "Identification", "Physical", "Operational", "Documentation".
 - **Data Field Details**: To the right of each DataField there is a chevron button, which expands a section with metadata, a delete button, and a few more features for the associated DataField.
 
-### Empty State
+### Default DataFields
+- "Description": A short description of the asset.
+- "Type Of": Such as "Vehicle", "Building", "Machine", "Equipment", "Tool", "Other".
+- "Tags": A list of tags that can be used to search for the asset.
+
+### Empty State (ROOT view)
 - Default welcome message "Create a new asset to get started"
-- "Create New Asset" button
+- CreateNewTreeNode button (isRoot state)
+
+#### Navigation Logic:
+
+- URLs: Only for top-level assets (vehicles, buildings, machines)
+- Sub-navigation: All handled client-side within the asset view
+- Up button: Just navigates within the current asset's tree structure
+- **URL persistence**: Only the current top-level asset appears in the URL (/asset/[name]); all sub-navigation within that asset's tree is handled client-side without URL changes, with the "Up" button providing the primary navigation mechanism back through the hierarchy.
 
 ### DataField Library
 - **It's a node!**: Just like the other nodes, using the same TreeNode component.
@@ -135,6 +130,10 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - Insulation Resistance: 100MΩ
 - Notes: This is a note about the asset.
 - Image: https://example.com/image.jpg
+
+## Pages and URL Structure
+- / for ROOT view
+- /asset/[Top_Level_Asset_Name] for ASSET view (drill down within that asset)
 
 ## Data Schema
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a prototyping project for developing clean, simple web components using Lit with TypeScript and Storybook. The project prioritizes simplicity and minimal changes to achieve results.
+This is a prototyping project for developing clean, simple web components using Lit with TypeScript and Storybook. The project prioritizes simplicity and minimal changes to achieve results. PROTOTYPING, PROTOTYPING, PROTOTYPING! We must always do the simplest possible thing to achieve any given goal. 
 
 **Key Principle**: Always do the simplest thing, make minimal changes, keep simplicity and clean code first.
 
