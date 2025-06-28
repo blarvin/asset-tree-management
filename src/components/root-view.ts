@@ -7,7 +7,7 @@ export class RootView extends LitElement {
     :host {
       display: block;
       position: relative;
-      min-height: 100vh;
+      min-height: 98vh;
       border: 2px solid blue;
       padding: 16px;
       box-sizing: border-box;

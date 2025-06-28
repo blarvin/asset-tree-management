@@ -5,7 +5,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
