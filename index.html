@@ -17,21 +17,16 @@
         import { idbPersistenceAdapter } from './src/adapters/idb-persistence-adapter.js';
 
         async function setupApp() {
-            console.log('🚀 Setting up app...');
-            
             // Set up controller with persistence
             const treeController = new TreeNodeController(idbPersistenceAdapter);
-            console.log('✅ TreeNodeController created');
             
             // Wait for root-view component to be defined
             await customElements.whenDefined('root-view');
-            console.log('✅ root-view component defined');
             
             // Wire up the root-view component
             const rootView = document.querySelector('root-view');
             if (rootView) {
                 rootView.treeController = treeController;
-                console.log('✅ treeController attached to root-view');
             } else {
                 console.error('❌ root-view element not found');
             }

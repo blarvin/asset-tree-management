@@ -67,10 +67,10 @@ export class TreeNodeController {
   }
 
   /**
-   * Create a bound persistence adapter for a specific node
-   * This returns a persistence adapter that can be passed directly to a TreeNode component
+   * Create a persistence adapter that can be passed directly to TreeNode components
+   * All TreeNode instances share the same controller for consistency
    */
-  createNodeAdapter(nodeId: string): TreeNodePersistence {
+  createNodeAdapter(): TreeNodePersistence {
     return {
       loadNode: (id: string) => this.loadNode(id),
       saveNode: (nodeData: Partial<TreeNodeData> & { id: string }) => this.saveNode(nodeData)

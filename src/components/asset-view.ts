@@ -83,16 +83,9 @@ export class AssetView extends LitElement {
   }
 
   private _getPersistenceAdapter(): TreeNodePersistence | undefined {
-    console.log('🔍 AssetView _getPersistenceAdapter called');
-    console.log('  treeController:', !!this.treeController);
-    console.log('  persistenceAdapter:', !!this.persistenceAdapter);
-    
     if (this.treeController) {
-      const adapter = this.treeController.createNodeAdapter('');
-      console.log('  returning controller adapter:', !!adapter);
-      return adapter;
+      return this.treeController.createNodeAdapter();
     }
-    console.log('  returning direct adapter:', !!this.persistenceAdapter);
     return this.persistenceAdapter;
   }
 }
