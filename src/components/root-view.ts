@@ -20,11 +20,8 @@ export class RootView extends LitElement {
       bottom: 8px;
       right: 8px;
       font-size: 12px;
-      color: blue;
+      color: rgb(46, 66, 252);
       font-family: monospace;
-      background: rgba(255, 255, 255, 0);
-      padding: 2px 4px;
-      border-radius: 2px;
     }
 
     .content {
