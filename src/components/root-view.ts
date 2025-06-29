@@ -54,13 +54,16 @@ export class RootView extends LitElement {
   }
 
   private async _loadAssetsFromIDB() {
+    console.log('📂 Loading assets from IDB...');
     this._isLoadingAssets = true;
     try {
       const rootNodes = await treeNodeStore.getRootNodes();
+      console.log(`✅ Loaded ${rootNodes.length} root nodes:`, rootNodes);
       this._assets = rootNodes.map(node => ({
         id: node.id,
         name: node.nodeName
       }));
+      console.log('📋 Mapped assets:', this._assets);
     } catch (error) {
       console.error('❌ Failed to load assets:', error);
       this._assets = [];
@@ -80,13 +83,18 @@ export class RootView extends LitElement {
         ` : ''}
         
         <!-- List of root assets -->
-        ${this._assets.map(asset => html`
-          <tree-node 
-            isRoot 
-            nodeId=${asset.id}
-            @tree-node-action=${this._handleTreeNodeAction}
-          ></tree-node>
-        `)}
+        ${this._assets.map(asset => {
+          const adapter = this._getPersistenceAdapter();
+          console.log(`🌳 Rendering tree-node ${asset.id} with adapter:`, !!adapter);
+          return html`
+            <tree-node 
+              isRoot 
+              nodeId=${asset.id}
+              .persistenceAdapter=${adapter}
+              @tree-node-action=${this._handleTreeNodeAction}
+            ></tree-node>
+          `;
+        })}
         
         <!-- Create new asset button -->
         <create-new-tree-node isRoot @create-node=${this._handleCreateNode}></create-new-tree-node>
@@ -98,10 +106,14 @@ export class RootView extends LitElement {
   private _renderAssetView() {
     const isNewAsset = this._newAssetIds.has(this._currentAssetId || '');
     
+    console.log('🏗️ Rendering asset-view with treeController:', !!this.treeController);
+    
     return html`
       <asset-view 
         currentAssetId=${this._currentAssetId}
         ?isNewAsset=${isNewAsset}
+        .treeController=${this.treeController}
+        .persistenceAdapter=${this.persistenceAdapter}
         @tree-node-action=${this._handleTreeNodeAction}
         @create-node=${this._handleCreateNode}
       ></asset-view>
@@ -126,6 +138,7 @@ export class RootView extends LitElement {
 
   private async _handleTreeNodeAction(event: CustomEvent) {
     const { action, nodeId, nodeName } = event.detail;
+    console.log(`🎯 TreeNode action: ${action}`, { nodeId, nodeName });
     
     switch (action) {
       case 'navigate-up':
@@ -152,6 +165,20 @@ export class RootView extends LitElement {
         this._newAssetIds.delete(nodeId);
         break;
     }
+  }
+
+  private _getPersistenceAdapter(): TreeNodePersistence | undefined {
+    console.log('🔍 _getPersistenceAdapter called');
+    console.log('  treeController:', !!this.treeController);
+    console.log('  persistenceAdapter:', !!this.persistenceAdapter);
+    
+    if (this.treeController) {
+      const adapter = this.treeController.createNodeAdapter('');
+      console.log('  returning controller adapter:', !!adapter);
+      return adapter;
+    }
+    console.log('  returning direct adapter:', !!this.persistenceAdapter);
+    return this.persistenceAdapter;
   }
 }
 

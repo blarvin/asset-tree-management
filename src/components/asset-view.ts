@@ -1,5 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { TreeNodeController } from '../controllers/tree-node-controller.js';
+import { TreeNodePersistence } from './tree-node.js';
 import './tree-node.js';
 import './create-new-tree-node.js';
 
@@ -10,6 +12,12 @@ export class AssetView extends LitElement {
 
   @property({ type: Boolean })
   isNewAsset = false;
+
+  @property({ type: Object })
+  treeController?: TreeNodeController;
+
+  @property({ type: Object })
+  persistenceAdapter?: TreeNodePersistence;
 
   static styles = css`
     :host {
@@ -62,6 +70,7 @@ export class AssetView extends LitElement {
             isParent 
             ?isUnderConstruction=${this.isNewAsset}
             nodeId=${this.currentAssetId}
+            .persistenceAdapter=${this._getPersistenceAdapter()}
             @tree-node-action=${this._handleTreeNodeAction}
           ></tree-node>
           
@@ -71,6 +80,20 @@ export class AssetView extends LitElement {
       </div>
       <div class="asset-label">asset-view</div>
     `;
+  }
+
+  private _getPersistenceAdapter(): TreeNodePersistence | undefined {
+    console.log('🔍 AssetView _getPersistenceAdapter called');
+    console.log('  treeController:', !!this.treeController);
+    console.log('  persistenceAdapter:', !!this.persistenceAdapter);
+    
+    if (this.treeController) {
+      const adapter = this.treeController.createNodeAdapter('');
+      console.log('  returning controller adapter:', !!adapter);
+      return adapter;
+    }
+    console.log('  returning direct adapter:', !!this.persistenceAdapter);
+    return this.persistenceAdapter;
   }
 }
 

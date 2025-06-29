@@ -1,4 +1,14 @@
-export { RootView } from './components/root-view.js';
-export { CreateNewTreeNode } from './components/create-new-tree-node.js';
+// Core Web Components
 export { TreeNode } from './components/tree-node.js';
+export { CreateNewTreeNode } from './components/create-new-tree-node.js';
+
+// Optional Orchestration Components (for prototyping)
+export { RootView } from './components/root-view.js';
 export { AssetView } from './components/asset-view.js';
+
+// Interfaces and Types
+export type { TreeNodeData, TreeNodePersistence } from './components/tree-node.js';
+
+// Controllers and Adapters
+export { TreeNodeController } from './controllers/tree-node-controller.js';
+export { IDBPersistenceAdapter, idbPersistenceAdapter } from './adapters/idb-persistence-adapter.js';

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Web Components Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .demo-title {
+            color: #4a9eff;
+            margin-bottom: 10px;
+        }
+        .demo-description {
+            color: #ccc;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .nav-bar {
+            background: #333;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .nav-bar button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .current-view {
+            color: #4a9eff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pure Web Components Demo</h1>
+    <p>This demonstrates how to use TreeNode components without any orchestration layer.</p>
+
+    <div class="demo-section">
+        <h2 class="demo-title">1. Static Data Mode</h2>
+        <p class="demo-description">TreeNode with static data - no persistence, pure presentation</p>
+        <tree-node id="static-node"></tree-node>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="demo-title">2. Persistence Mode</h2>
+        <p class="demo-description">TreeNode with external persistence adapter</p>
+        <tree-node id="persistent-node"></tree-node>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="demo-title">3. Manual Navigation Demo</h2>
+        <p class="demo-description">Multiple nodes with manual navigation (like React Router would handle)</p>
+        
+        <div class="nav-bar">
+            <button onclick="showView('root')">Root View</button>
+            <button onclick="showView('asset-1')">Asset 1</button>
+            <button onclick="showView('asset-2')">Asset 2</button>
+            <span class="current-view" id="current-view">Root View</span>
+        </div>
+
+        <div id="view-container">
+            <!-- Views will be inserted here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import './src/components/tree-node.js';
+        import { TreeNodeController } from './src/controllers/tree-node-controller.js';
+        import { idbPersistenceAdapter } from './src/adapters/idb-persistence-adapter.js';
+
+        // Setup 1: Static Node
+        const staticNode = document.getElementById('static-node');
+        staticNode.nodeData = {
+            id: 'static-1',
+            nodeName: 'Static Demo Node',
+            parentId: null
+        };
+        staticNode.addEventListener('tree-node-action', (event) => {
+            console.log('Static node action:', event.detail);
+            alert(`Static node: ${event.detail.action}`);
+        });
+
+        // Setup 2: Persistent Node
+        const controller = new TreeNodeController(idbPersistenceAdapter);
+        const persistentNode = document.getElementById('persistent-node');
+        persistentNode.nodeId = 'demo-persistent';
+        persistentNode.persistenceAdapter = controller.createNodeAdapter('demo-persistent');
+        persistentNode.isUnderConstruction = true; // Start in edit mode
+        persistentNode.addEventListener('tree-node-action', (event) => {
+            console.log('Persistent node action:', event.detail);
+            if (event.detail.action === 'saved') {
+                alert('Node saved to persistence!');
+            }
+        });
+
+        // Setup 3: Manual Navigation Demo
+        const viewContainer = document.getElementById('view-container');
+        const currentViewLabel = document.getElementById('current-view');
+        let currentView = 'root';
+
+        const views = {
+            root: { id: 'root', name: 'Root Asset', isRoot: true },
+            'asset-1': { id: 'asset-1', name: 'My First Asset', parentId: 'root' },
+            'asset-2': { id: 'asset-2', name: 'My Second Asset', parentId: 'root' }
+        };
+
+        window.showView = function(viewId) {
+            currentView = viewId;
+            currentViewLabel.textContent = `${views[viewId].name}`;
+            
+            // Clear container
+            viewContainer.innerHTML = '';
+            
+            // Create new tree-node
+            const treeNode = document.createElement('tree-node');
+            const viewData = views[viewId];
+            
+            treeNode.nodeId = viewData.id;
+            treeNode.nodeData = viewData;
+            if (viewData.isRoot) treeNode.isRoot = true;
+            if (viewData.parentId) treeNode.isParent = true;
+            
+            treeNode.addEventListener('tree-node-action', (event) => {
+                const { action, nodeId } = event.detail;
+                console.log(`Navigation action: ${action} for ${nodeId}`);
+                
+                // This is where React Router, Vue Router, etc. would handle navigation
+                if (action === 'navigate-up') {
+                    showView('root');
+                } else if (action === 'navigate-to') {
+                    // In a real app, you'd navigate to the detail view
+                    alert(`Would navigate to: ${nodeId}`);
+                }
+            });
+            
+            viewContainer.appendChild(treeNode);
+        };
+
+        // Initialize with root view
+        showView('root');
+    </script>
+</body>
+</html>

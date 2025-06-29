@@ -1,6 +1,16 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { treeNodeStore } from '../services/tree-node-store.js';
+
+export interface TreeNodeData {
+  id: string;
+  nodeName: string;
+  parentId?: string | null;
+}
+
+export interface TreeNodePersistence {
+  loadNode(nodeId: string): Promise<TreeNodeData | null>;
+  saveNode(nodeData: Partial<TreeNodeData> & { id: string }): Promise<void>;
+}
 
 @customElement('tree-node')
 export class TreeNode extends LitElement {
@@ -18,6 +28,12 @@ export class TreeNode extends LitElement {
 
   @property({ type: String })
   nodeId = '';
+
+  @property({ type: Object })
+  persistenceAdapter?: TreeNodePersistence;
+
+  @property({ type: Object })
+  nodeData?: TreeNodeData;
 
   @state()
   private _nodeName = '';
@@ -144,18 +160,24 @@ export class TreeNode extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    await this._loadFromStorage();
+    if (this.nodeData) {
+      this._nodeName = this.nodeData.nodeName || '';
+    } else if (this.persistenceAdapter && this.nodeId) {
+      await this._loadFromStorage();
+    }
   }
 
   private async _loadFromStorage() {
+    if (!this.persistenceAdapter) return;
+    
     this._isLoading = true;
     try {
-      const nodeData = await treeNodeStore.loadNode(this.nodeId);
+      const nodeData = await this.persistenceAdapter.loadNode(this.nodeId);
       if (nodeData) {
         this._nodeName = nodeData.nodeName || '';
       }
     } catch (error) {
-      console.error('Failed to load node data from IndexedDB:', error);
+      console.error('Failed to load node data:', error);
     } finally {
       this._isLoading = false;
       this.requestUpdate();
@@ -164,11 +186,15 @@ export class TreeNode extends LitElement {
 
 
   private async _saveToStorage() {
+    if (!this.persistenceAdapter) {
+      throw new Error('No persistence adapter provided');
+    }
+    
     try {
-      await treeNodeStore.saveNode({
+      await this.persistenceAdapter.saveNode({
         id: this.nodeId,
         nodeName: this._nodeName,
-        parentId: 'ROOT'
+        parentId: this.nodeData?.parentId || 'ROOT'
       });
     } catch (error) {
       console.error('❌ Failed to save node:', error);
@@ -185,12 +211,15 @@ export class TreeNode extends LitElement {
   private async _handleSave() {
     if (this._nodeName.trim()) {
       try {
-        await this._saveToStorage();
+        if (this.persistenceAdapter) {
+          await this._saveToStorage();
+        }
         this.isUnderConstruction = false;
         this.isParent = true;
         this._dispatchStateChange('saved');
       } catch (error) {
         console.error('❌ Failed to save node:', error);
+        this._dispatchStateChange('save-failed', error instanceof Error ? error.message : 'Unknown error');
       }
     }
   }
@@ -210,12 +239,13 @@ export class TreeNode extends LitElement {
     }
   }
 
-  private _dispatchStateChange(action: string) {
+  private _dispatchStateChange(action: string, error?: string) {
     const event = new CustomEvent('tree-node-action', {
       detail: { 
         action, 
         nodeId: this.nodeId,
-        nodeName: this._nodeName
+        nodeName: this._nodeName,
+        error
       },
       bubbles: true,
       composed: true
