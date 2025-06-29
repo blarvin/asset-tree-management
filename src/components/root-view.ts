@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { v4 as uuidv4 } from 'uuid';
+import { treeNodeStore } from '../services/tree-node-store.js';
 import './create-new-tree-node.js';
 import './tree-node.js';
 import './asset-view.js';
@@ -18,6 +19,9 @@ export class RootView extends LitElement {
 
   @state()
   private _newAssetIds: Set<string> = new Set();
+
+  @state()
+  private _isLoadingAssets = false;
   static styles = css`
     :host {
       display: block;
@@ -44,9 +48,37 @@ export class RootView extends LitElement {
     }
   `;
 
+  async connectedCallback() {
+    super.connectedCallback();
+    await this._loadAssetsFromIDB();
+  }
+
+  private async _loadAssetsFromIDB() {
+    this._isLoadingAssets = true;
+    try {
+      const rootNodes = await treeNodeStore.getRootNodes();
+      this._assets = rootNodes.map(node => ({
+        id: node.id,
+        name: node.nodeName
+      }));
+    } catch (error) {
+      console.error('❌ Failed to load assets:', error);
+      this._assets = [];
+    } finally {
+      this._isLoadingAssets = false;
+      this.requestUpdate();
+    }
+  }
+
   private _renderRootView() {
     return html`
       <div class="content">
+        ${this._isLoadingAssets ? html`
+          <div style="padding: 20px; color: rgb(242, 129, 129);">
+            Loading assets...
+          </div>
+        ` : ''}
+        
         <!-- List of root assets -->
         ${this._assets.map(asset => html`
           <tree-node 
@@ -89,13 +121,10 @@ export class RootView extends LitElement {
       this._currentAssetId = newAssetId;
       this._currentView = 'ASSET';
       this._newAssetIds.add(newAssetId);
-    } else {
-      // Handle creating sub-asset (child node)
-      console.log('Creating sub-asset for:', this._currentAssetId);
     }
   }
 
-  private _handleTreeNodeAction(event: CustomEvent) {
+  private async _handleTreeNodeAction(event: CustomEvent) {
     const { action, nodeId, nodeName } = event.detail;
     
     switch (action) {
@@ -108,11 +137,9 @@ export class RootView extends LitElement {
         this._currentView = 'ASSET';
         break;
       case 'saved':
-        // Asset was saved, add to assets list if it's new
-        if (nodeName && !this._assets.find(a => a.id === nodeId)) {
-          this._assets = [...this._assets, { id: nodeId, name: nodeName }];
+        if (nodeName) {
+          await this._loadAssetsFromIDB();
         }
-        // Remove from new assets set (no longer under construction)
         this._newAssetIds.delete(nodeId);
         break;
       case 'cancelled':

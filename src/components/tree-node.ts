@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { v4 as uuidv4 } from 'uuid';
+import { treeNodeStore } from '../services/tree-node-store.js';
 
 @customElement('tree-node')
 export class TreeNode extends LitElement {
@@ -23,7 +23,7 @@ export class TreeNode extends LitElement {
   private _nodeName = '';
 
   @state()
-  private _isEditing = false;
+  private _isLoading = false;
 
   static styles = css`
     :host {
@@ -142,32 +142,38 @@ export class TreeNode extends LitElement {
     }
   `;
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
-    if (!this.nodeId) {
-      this.nodeId = uuidv4();
-    }
-    this._loadFromStorage();
+    await this._loadFromStorage();
   }
 
-  private _loadFromStorage() {
-    const stored = localStorage.getItem(`tree-node-${this.nodeId}`);
-    if (stored) {
-      try {
-        const data = JSON.parse(stored);
-        this._nodeName = data.nodeName || '';
-      } catch (e) {
-        console.warn('Failed to load node data from storage:', e);
+  private async _loadFromStorage() {
+    this._isLoading = true;
+    try {
+      const nodeData = await treeNodeStore.loadNode(this.nodeId);
+      if (nodeData) {
+        this._nodeName = nodeData.nodeName || '';
       }
+    } catch (error) {
+      console.error('Failed to load node data from IndexedDB:', error);
+    } finally {
+      this._isLoading = false;
+      this.requestUpdate();
     }
   }
 
-  private _saveToStorage() {
-    const data = {
-      nodeName: this._nodeName,
-      nodeId: this.nodeId
-    };
-    localStorage.setItem(`tree-node-${this.nodeId}`, JSON.stringify(data));
+
+  private async _saveToStorage() {
+    try {
+      await treeNodeStore.saveNode({
+        id: this.nodeId,
+        nodeName: this._nodeName,
+        parentId: 'ROOT'
+      });
+    } catch (error) {
+      console.error('❌ Failed to save node:', error);
+      throw error;
+    }
   }
 
   private _handleNameInput(event: Event) {
@@ -176,12 +182,16 @@ export class TreeNode extends LitElement {
   }
 
 
-  private _handleSave() {
+  private async _handleSave() {
     if (this._nodeName.trim()) {
-      this._saveToStorage();
-      this.isUnderConstruction = false;
-      this.isParent = true;
-      this._dispatchStateChange('saved');
+      try {
+        await this._saveToStorage();
+        this.isUnderConstruction = false;
+        this.isParent = true;
+        this._dispatchStateChange('saved');
+      } catch (error) {
+        console.error('❌ Failed to save node:', error);
+      }
     }
   }
 
@@ -245,6 +255,14 @@ export class TreeNode extends LitElement {
   }
 
   private _renderNormalMode() {
+    if (this._isLoading) {
+      return html`
+        <div class="node-content">
+          <div class="node-title">Loading...</div>
+        </div>
+      `;
+    }
+
     const displayName = this._nodeName || 'New Asset';
 
     return html`
