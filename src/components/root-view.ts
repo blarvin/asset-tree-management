@@ -12,6 +12,7 @@ export class RootView extends LitElement {
       border: 2px solid blue;
       margin: 1px;
       box-sizing: border-box;
+      background: rgba(11, 6, 6, 0.91);
     }
 
     .root-label {
@@ -21,7 +22,7 @@ export class RootView extends LitElement {
       font-size: 12px;
       color: blue;
       font-family: monospace;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0);
       padding: 2px 4px;
       border-radius: 2px;
     }
