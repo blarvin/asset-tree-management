@@ -3,6 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { v4 as uuidv4 } from 'uuid';
 import './create-new-tree-node.js';
 import './tree-node.js';
+import './asset-view.js';
 
 @customElement('root-view')
 export class RootView extends LitElement {
@@ -66,21 +67,12 @@ export class RootView extends LitElement {
     const isNewAsset = this._newAssetIds.has(this._currentAssetId || '');
     
     return html`
-      <div class="content">
-        <!-- Current asset being viewed -->
-        ${this._currentAssetId ? html`
-          <tree-node 
-            isParent 
-            ?isUnderConstruction=${isNewAsset}
-            nodeId=${this._currentAssetId}
-            @tree-node-action=${this._handleTreeNodeAction}
-          ></tree-node>
-          
-          <!-- Create sub-asset button -->
-          <create-new-tree-node @create-node=${this._handleCreateNode}></create-new-tree-node>
-        ` : ''}
-      </div>
-      <div class="root-label">asset-view</div>
+      <asset-view 
+        currentAssetId=${this._currentAssetId}
+        ?isNewAsset=${isNewAsset}
+        @tree-node-action=${this._handleTreeNodeAction}
+        @create-node=${this._handleCreateNode}
+      ></asset-view>
     `;
   }
 
