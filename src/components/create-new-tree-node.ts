@@ -9,49 +9,25 @@ export class CreateNewTreeNode extends LitElement {
   static styles = css`
     :host {
       display: block;
-      width: 99%;
-      margin: 4px auto;
+      width: 100%;
     }
 
-    .create-button {
+    button.create-button {
       width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #e0e0e0;
+      border: none;
+      padding: 6px;
       border-radius: 4px;
-      background: #f9f9f9;
+      background: rgb(30, 87, 134);
       cursor: pointer;
       font-family: inherit;
-      font-size: 14px;
-      color: #666;
-      text-align: left;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      min-height: 44px;
+      font-size: 16px;
+      color: rgb(242, 129, 129);
+      min-height: 20px;
       box-sizing: border-box;
+      outline: none;
+      box-shadow: none;
     }
 
-    .create-button:hover {
-      background: #f0f0f0;
-      border-color: #ccc;
-      color: #333;
-    }
-
-    .create-button:active {
-      background: #e8e8e8;
-      transform: translateY(1px);
-    }
-
-    .create-button:focus {
-      outline: 2px solid #007acc;
-      outline-offset: 2px;
-    }
-
-    .plus-icon {
-      margin-right: 8px;
-      font-weight: bold;
-      color: #007acc;
-    }
   `;
 
   private _handleClick() {
@@ -65,10 +41,9 @@ export class CreateNewTreeNode extends LitElement {
 
   render() {
     const label = this.isRoot ? 'Create New Asset' : 'Create New Sub-Asset Here';
-    
+
     return html`
       <button class="create-button" @click=${this._handleClick}>
-        <span class="plus-icon">+</span>
         ${label}
       </button>
     `;
