@@ -1,7 +1,9 @@
 import { LitElement, html, css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, state, property } from 'lit/decorators.js';
 import { v4 as uuidv4 } from 'uuid';
 import { treeNodeStore } from '../services/tree-node-store.js';
+import { TreeNodePersistence } from './tree-node.js';
+import { TreeNodeController } from '../controllers/tree-node-controller.js';
 import './create-new-tree-node.js';
 import './tree-node.js';
 import './asset-view.js';
@@ -22,6 +24,12 @@ export class RootView extends LitElement {
 
   @state()
   private _isLoadingAssets = false;
+
+  @property({ type: Object })
+  treeController?: TreeNodeController;
+
+  @property({ type: Object })
+  persistenceAdapter?: TreeNodePersistence;
   static styles = css`
     :host {
       display: block;
