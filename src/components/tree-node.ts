@@ -31,7 +31,7 @@ export class TreeNode extends LitElement {
 
   @property({ type: Object })
   persistenceAdapter?: TreeNodePersistence;
-
+  
   @property({ type: Object })
   nodeData?: TreeNodeData;
 

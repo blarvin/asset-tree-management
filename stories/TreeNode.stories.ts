@@ -2,6 +2,30 @@ import type { Meta, StoryObj } from '@storybook/web-components';
 import { html } from 'lit';
 import { action } from 'storybook/actions';
 import '../src/components/tree-node.js';
+import { TreeNodePersistence, TreeNodeData } from '../src/components/tree-node.js';
+
+// Mock persistence adapter for stories
+const mockPersistenceAdapter: TreeNodePersistence = {
+  async loadNode(nodeId: string): Promise<TreeNodeData | null> {
+    // Simulate loading data
+    const mockData: Record<string, TreeNodeData> = {
+      'sample-root-node': { id: 'sample-root-node', nodeName: 'Main Building', parentId: 'ROOT' },
+      'sample-parent-node': { id: 'sample-parent-node', nodeName: 'HVAC System', parentId: 'building-1' },
+      'sample-child-node': { id: 'sample-child-node', nodeName: 'Air Handler Unit 1', parentId: 'hvac-system' },
+      'building-main': { id: 'building-main', nodeName: 'Corporate Headquarters', parentId: 'ROOT' },
+      'hvac-system': { id: 'hvac-system', nodeName: 'HVAC System', parentId: 'building-main' },
+      'electrical-panel': { id: 'electrical-panel', nodeName: 'Electrical Panel A', parentId: 'building-main' },
+      'fire-safety': { id: 'fire-safety', nodeName: 'Fire Safety Systems', parentId: 'building-main' },
+    };
+    console.log('Mock loadNode called:', nodeId);
+    return mockData[nodeId] || null;
+  },
+  
+  async saveNode(nodeData: Partial<TreeNodeData> & { id: string }): Promise<void> {
+    console.log('Mock saveNode called:', nodeData);
+    action('persistence-save')(nodeData);
+  }
+};
 
 const meta: Meta = {
   title: 'Components/TreeNode',
@@ -51,6 +75,7 @@ export const RootState: Story = {
       ?isChild=${isChild}
       ?isUnderConstruction=${isUnderConstruction}
       nodeId=${nodeId}
+      .persistenceAdapter=${mockPersistenceAdapter}
       @tree-node-action=${action('tree-node-action')}
     ></tree-node>
   `,
@@ -71,6 +96,7 @@ export const ParentState: Story = {
       ?isChild=${isChild}
       ?isUnderConstruction=${isUnderConstruction}
       nodeId=${nodeId}
+      .persistenceAdapter=${mockPersistenceAdapter}
       @tree-node-action=${action('tree-node-action')}
     ></tree-node>
   `,
@@ -91,6 +117,7 @@ export const ChildState: Story = {
       ?isChild=${isChild}
       ?isUnderConstruction=${isUnderConstruction}
       nodeId=${nodeId}
+      .persistenceAdapter=${mockPersistenceAdapter}
       @tree-node-action=${action('tree-node-action')}
     ></tree-node>
   `,
@@ -111,6 +138,7 @@ export const UnderConstructionState: Story = {
       ?isChild=${isChild}
       ?isUnderConstruction=${isUnderConstruction}
       nodeId=${nodeId}
+      .persistenceAdapter=${mockPersistenceAdapter}
       @tree-node-action=${action('tree-node-action')}
     ></tree-node>
   `,
@@ -123,7 +151,8 @@ export const AllStates: Story = {
         <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Root State (isRoot=true)</h3>
         <tree-node 
           isRoot 
-          nodeId="demo-root"
+          nodeId="sample-root-node"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('root-action')}
         ></tree-node>
       </div>
@@ -132,7 +161,8 @@ export const AllStates: Story = {
         <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Parent State (isParent=true)</h3>
         <tree-node 
           isParent
-          nodeId="demo-parent"
+          nodeId="sample-parent-node"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('parent-action')}
         ></tree-node>
       </div>
@@ -141,7 +171,8 @@ export const AllStates: Story = {
         <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Child State (isChild=true)</h3>
         <tree-node 
           isChild
-          nodeId="demo-child"
+          nodeId="sample-child-node"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('child-action')}
         ></tree-node>
       </div>
@@ -151,6 +182,7 @@ export const AllStates: Story = {
         <tree-node 
           isUnderConstruction
           nodeId="demo-construction"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('construction-action')}
         ></tree-node>
       </div>
@@ -178,6 +210,7 @@ export const InteractiveTransitions: Story = {
         <tree-node 
           isUnderConstruction
           nodeId="interactive-construction"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('interactive-construction-action')}
         ></tree-node>
       </div>
@@ -186,7 +219,8 @@ export const InteractiveTransitions: Story = {
         <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Clickable Root Node</h4>
         <tree-node 
           isRoot
-          nodeId="interactive-root"
+          nodeId="sample-root-node"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('interactive-root-action')}
         ></tree-node>
       </div>
@@ -195,12 +229,43 @@ export const InteractiveTransitions: Story = {
         <h4 style="margin: 0 0 8px 0; font-size: 14px; color: #666;">Parent with Up Button</h4>
         <tree-node 
           isParent
-          nodeId="interactive-parent"
+          nodeId="sample-parent-node"
+          .persistenceAdapter=${mockPersistenceAdapter}
           @tree-node-action=${action('interactive-parent-action')}
         ></tree-node>
       </div>
     </div>
   `,
+};
+
+export const WithNodeData: Story = {
+  render: () => {
+    const nodeData: TreeNodeData = {
+      id: 'custom-node',
+      nodeName: 'Emergency Generator',
+      parentId: 'power-systems'
+    };
+    
+    return html`
+      <div style="display: flex; flex-direction: column; gap: 16px; max-width: 600px;">
+        <div style="padding: 16px; background: #f5f5f5; border-radius: 8px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #333;">Using nodeData Property</h3>
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #666;">
+            This demonstrates passing node data directly without persistence adapter.
+          </p>
+          <pre style="margin: 0; font-size: 12px; background: #fff; padding: 8px; border-radius: 4px;">
+nodeData = ${JSON.stringify(nodeData, null, 2)}</pre>
+        </div>
+        
+        <tree-node 
+          isParent
+          nodeId=${nodeData.id}
+          .nodeData=${nodeData}
+          @tree-node-action=${action('node-data-action')}
+        ></tree-node>
+      </div>
+    `;
+  },
 };
 
 export const HierarchyExample: Story = {
@@ -217,6 +282,7 @@ export const HierarchyExample: Story = {
       <tree-node 
         isParent
         nodeId="building-main"
+        .persistenceAdapter=${mockPersistenceAdapter}
         @tree-node-action=${action('building-action')}
       ></tree-node>
       
@@ -224,18 +290,21 @@ export const HierarchyExample: Story = {
       <tree-node 
         isChild
         nodeId="hvac-system"
+        .persistenceAdapter=${mockPersistenceAdapter}
         @tree-node-action=${action('hvac-action')}
       ></tree-node>
       
       <tree-node 
         isChild
         nodeId="electrical-panel"
+        .persistenceAdapter=${mockPersistenceAdapter}
         @tree-node-action=${action('electrical-action')}
       ></tree-node>
       
       <tree-node 
         isChild
         nodeId="fire-safety"
+        .persistenceAdapter=${mockPersistenceAdapter}
         @tree-node-action=${action('fire-safety-action')}
       ></tree-node>
     </div>
