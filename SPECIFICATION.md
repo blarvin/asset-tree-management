@@ -9,16 +9,7 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - **Self-Construction**: Users create and edit assets, structure, and attributes
 - **Modeless In-Situ Editing**: Edit without leaving tree view or entering edit modes
 - **Mobile-First**: Vertical scrolling, single/double-tap interactions
-
-
 - **Offline-First Data**: Local-first with sync capabilities
-- **JAMStack Architecture**: Serverless deployment
-
-## Technical Stack
-- **Framework**: Lit 3.3.0 web components
-- **Language**: TypeScript with strict mode
-- **Build**: Vite 6.3.5 library mode
-- **Data**: indexedDB persists the node TreeNode and DataField data.
 
 ## Component Architecture
 
@@ -86,25 +77,19 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 
 ### Example DataFields (hardcoded for now)
 - Location: 123 Main St, Anytown, USA
-- Part Description: Soft Start Motor Controller, 3 phase
+- Description: relay, 12 pin, Bosch pattern, 110v coil
 - Serial Number: 1234567890
 - Part Number: 1234567890
 - Manufacturer: Acme Inc.
 - Model: Model ABC-123
 - Weight: 36.2 kg
 - Dimensions: 310 x 210 x 110 mm
-- Mount: NEMA 12
-- Shaft Diameter: 1.50 inches
-- Shaft Key: woodruff, 3.5mm
 - Color: Red
 - Installed Date: 2025-01-01
 - Status: In Service
-- Current Rating: 10A
 - Current Reading: 5.4 amps at 2025-01-01
 - Power Rating: 1200W
-- Phase: 3-Phase
-- Poles: 4
-- Notes: This is a nice little note about the asset.
+- Note: This is a nice little note about the asset.
 - Image: <IMAGE>
 
 ### Empty State (ROOT view)
@@ -166,6 +151,6 @@ interface DataFieldRecord {
 ## Phase 1 Prototyping Simplifications
 - **Skip virtualParents**: Focus on basic parent-child relationships only
 - **Skip componentType and componentVersion**: Use hardcoded list of available DataFields 
-- **Skip customProperties**: Focus on basic node and datafield types only
+- **Skip customProperties**: Focus on basic node and DataField types only
 - **Skip isRequired**: No "required data field" features for now
 - **Skip isEditable and isLocked**: All data fields are editable for now, no "locking" features for now
