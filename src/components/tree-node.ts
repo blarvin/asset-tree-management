@@ -5,11 +5,13 @@ export interface TreeNodeData {
   id: string;
   nodeName: string;
   parentId?: string | null;
+  ancestorNamePath?: string;
 }
 
 export interface TreeNodePersistence {
   loadNode(nodeId: string): Promise<TreeNodeData | null>;
   saveNode(nodeData: Partial<TreeNodeData> & { id: string }): Promise<void>;
+  loadChildNodes?(parentId: string): Promise<TreeNodeData[]>;
 }
 
 @customElement('tree-node')
@@ -37,6 +39,9 @@ export class TreeNode extends LitElement {
 
   @state()
   private _nodeName = '';
+
+  @state()
+  private _ancestorNamePath = '';
 
   @state()
   private _isLoading = false;
@@ -72,8 +77,7 @@ export class TreeNode extends LitElement {
     }
 
     .tree-node.is-child {
-      width: 85%;
-      margin-left: 15%;
+      width: 100%;
     }
 
     .tree-node.is-under-construction {
@@ -162,7 +166,8 @@ export class TreeNode extends LitElement {
     super.connectedCallback();
     if (this.nodeData) {
       this._nodeName = this.nodeData.nodeName || '';
-    } else if (this.persistenceAdapter && this.nodeId) {
+      this._ancestorNamePath = this.nodeData.ancestorNamePath || '';
+    } else if (this.persistenceAdapter && this.nodeId && !this.isUnderConstruction) {
       await this._loadFromStorage();
     }
   }
@@ -175,6 +180,7 @@ export class TreeNode extends LitElement {
       const nodeData = await this.persistenceAdapter.loadNode(this.nodeId);
       if (nodeData) {
         this._nodeName = nodeData.nodeName || '';
+        this._ancestorNamePath = nodeData.ancestorNamePath || '';
       }
     } catch (error) {
       console.error('Failed to load node data:', error);
@@ -194,7 +200,8 @@ export class TreeNode extends LitElement {
       await this.persistenceAdapter.saveNode({
         id: this.nodeId,
         nodeName: this._nodeName,
-        parentId: this.nodeData?.parentId || 'ROOT'
+        parentId: this.nodeData?.parentId || 'ROOT',
+        ancestorNamePath: this._ancestorNamePath
       });
     } catch (error) {
       console.error('❌ Failed to save node:', error);
@@ -234,7 +241,7 @@ export class TreeNode extends LitElement {
   }
 
   private _handleNodeClick() {
-    if (!this.isUnderConstruction && !this.isParent) {
+    if (!this.isUnderConstruction) {
       this._dispatchStateChange('navigate-to');
     }
   }
@@ -303,6 +310,11 @@ export class TreeNode extends LitElement {
       ` : ''}
       <div class="node-content" @click=${this._handleNodeClick}>
         <div class="node-title">${displayName}</div>
+        ${this.isChild && this._ancestorNamePath ? html`
+          <div style="font-size: 12px; color: rgba(242, 129, 129, 0.7); margin-top: 2px;">
+            ${this._ancestorNamePath}
+          </div>
+        ` : ''}
       </div>
     `;
   }

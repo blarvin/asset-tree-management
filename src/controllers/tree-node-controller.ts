@@ -67,13 +67,24 @@ export class TreeNodeController {
   }
 
   /**
+   * Load child nodes for a given parent
+   */
+  async loadChildNodes(parentId: string): Promise<TreeNodeData[]> {
+    if (this.persistenceAdapter.loadChildNodes) {
+      return this.persistenceAdapter.loadChildNodes(parentId);
+    }
+    return [];
+  }
+
+  /**
    * Create a persistence adapter that can be passed directly to TreeNode components
    * All TreeNode instances share the same controller for consistency
    */
   createNodeAdapter(): TreeNodePersistence {
     return {
       loadNode: (id: string) => this.loadNode(id),
-      saveNode: (nodeData: Partial<TreeNodeData> & { id: string }) => this.saveNode(nodeData)
+      saveNode: (nodeData: Partial<TreeNodeData> & { id: string }) => this.saveNode(nodeData),
+      loadChildNodes: (parentId: string) => this.loadChildNodes(parentId)
     };
   }
 }

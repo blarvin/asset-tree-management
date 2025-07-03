@@ -25,6 +25,7 @@ export class RootView extends LitElement {
   @state()
   private _isLoadingAssets = false;
 
+
   @property({ type: Object })
   treeController?: TreeNodeController;
 
@@ -126,27 +127,31 @@ export class RootView extends LitElement {
     return this._currentView === 'ROOT' ? this._renderRootView() : this._renderAssetView();
   }
 
-  private _handleCreateNode(event: CustomEvent) {
+  private async _handleCreateNode(event: CustomEvent) {
     const { isRoot } = event.detail;
     
     if (isRoot) {
-      // Create new asset and navigate to ASSET view
+      // Create new top-level asset and navigate to ASSET view
       const newAssetId = uuidv4();
       this._currentAssetId = newAssetId;
       this._currentView = 'ASSET';
       this._newAssetIds.add(newAssetId);
     }
+    // Child creation is now handled entirely within AssetView
   }
 
   private async _handleTreeNodeAction(event: CustomEvent) {
     const { action, nodeId, nodeName } = event.detail;
+    console.log(`🔥 RootView handling: ${action} for nodeId: ${nodeId} (${nodeName})`);
     
     switch (action) {
       case 'navigate-up':
+        console.log(`🔥 RootView: Navigating UP from ${nodeId} to ROOT`);
         this._currentView = 'ROOT';
         this._currentAssetId = null;
         break;
       case 'navigate-to':
+        console.log(`🔥 RootView: Navigating TO ${nodeId} (${nodeName})`);
         this._currentAssetId = nodeId;
         this._currentView = 'ASSET';
         break;

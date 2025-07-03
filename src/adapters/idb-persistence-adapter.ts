@@ -14,7 +14,8 @@ export class IDBPersistenceAdapter implements TreeNodePersistence {
     return {
       id: nodeRecord.id,
       nodeName: nodeRecord.nodeName,
-      parentId: nodeRecord.parentId
+      parentId: nodeRecord.parentId,
+      ancestorNamePath: nodeRecord.ancestorNamePath
     };
   }
 
@@ -22,8 +23,19 @@ export class IDBPersistenceAdapter implements TreeNodePersistence {
     await treeNodeStore.saveNode({
       id: nodeData.id,
       nodeName: nodeData.nodeName || '',
-      parentId: nodeData.parentId || 'ROOT'
+      parentId: nodeData.parentId || 'ROOT',
+      ancestorNamePath: nodeData.ancestorNamePath
     });
+  }
+
+  async loadChildNodes(parentId: string): Promise<TreeNodeData[]> {
+    const childRecords = await treeNodeStore.getChildNodes(parentId);
+    return childRecords.map(record => ({
+      id: record.id,
+      nodeName: record.nodeName,
+      parentId: record.parentId,
+      ancestorNamePath: record.ancestorNamePath
+    }));
   }
 }
 

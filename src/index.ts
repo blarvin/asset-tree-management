@@ -1,6 +1,7 @@
 // Core Web Components
 export { TreeNode } from './components/tree-node.js';
 export { CreateNewTreeNode } from './components/create-new-tree-node.js';
+export { ChildContainer } from './components/child-container.js';
 
 // Optional Orchestration Components (for prototyping)
 export { RootView } from './components/root-view.js';

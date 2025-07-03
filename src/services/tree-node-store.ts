@@ -5,6 +5,7 @@ export interface TreeNodeRecord {
   id: string;
   nodeName: string;
   parentId: string | null; // "ROOT" for top-level nodes
+  ancestorNamePath?: string;
   createdAt: number;
   updatedAt: number;
   // Extensible for future fields from full specification
@@ -183,6 +184,37 @@ class TreeNodeStore {
     } catch (error) {
       console.error('❌ Error in getRootNodes:', error);
       throw error; // Re-throw instead of silently returning empty array
+    }
+  }
+
+  async getChildNodes(parentId: string): Promise<TreeNodeRecord[]> {
+    try {
+      const db = await this.openDB();
+      const transaction = db.transaction([this.storeName], 'readonly');
+      const store = transaction.objectStore(this.storeName);
+      const index = store.index('parentId');
+
+      return new Promise((resolve, reject) => {
+        const request = index.getAll(parentId);
+        
+        request.onsuccess = () => {
+          const result = request.result || [];
+          resolve(result);
+        };
+        
+        request.onerror = () => {
+          console.error('❌ Error loading child nodes:', request.error);
+          reject(request.error);
+        };
+        
+        transaction.onerror = () => {
+          console.error('❌ Transaction error in getChildNodes:', transaction.error);
+          reject(transaction.error);
+        };
+      });
+    } catch (error) {
+      console.error('❌ Error in getChildNodes:', error);
+      throw error;
     }
   }
 
