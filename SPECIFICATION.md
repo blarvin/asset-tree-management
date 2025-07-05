@@ -149,7 +149,7 @@ The system uses a hierarchical tree structure with two primary entities:
 | updatedAt | timestamp | Yes | Last modification time (epoch) | Auto-updated on changes |
 | nodeOrdering | number | No | Display order among siblings | Default: 0 |
 | dataFields | Map<string, string> | No | Field ID references | Keys must exist in DataField table |
-| subAssets | Map<string, boolean> | No | Child node references | Keys must exist in TreeNode table |
+| childNodes | Map<string, boolean> | No | Child node references | Keys must exist in TreeNode table |
 
 **Phase 2 Fields (Future):**
 - virtualParents: string[] - For cross-references (cables, pipes, connections)
@@ -239,7 +239,7 @@ These fields are available for selection during node creation on the isCardUnder
     "660e8400-e29b-41d4-a716-446655440005": true,
     "660e8400-e29b-41d4-a716-446655440006": true
   },
-  "subAssets": {
+  "childNodes": {
     "550e8400-e29b-41d4-a716-446655440002": true,
     "550e8400-e29b-41d4-a716-446655440003": true
   }
