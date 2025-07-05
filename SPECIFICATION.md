@@ -235,9 +235,9 @@ These fields are available for selection during node creation on the isCardUnder
   "updatedAt": 1709942400000,
   "nodeOrdering": 0,
   "dataFields": {
-    "field001": true,
-    "field002": true,
-    "field003": true
+    "660e8400-e29b-41d4-a716-446655440004": true,
+    "660e8400-e29b-41d4-a716-446655440005": true,
+    "660e8400-e29b-41d4-a716-446655440006": true
   },
   "subAssets": {
     "550e8400-e29b-41d4-a716-446655440002": true,
@@ -250,7 +250,7 @@ These fields are available for selection during node creation on the isCardUnder
 ```json
 [
   {
-    "id": "field001",
+    "id": "660e8400-e29b-41d4-a716-446655440004",
     "fieldName": "Serial Number",
     "parentNodeId": "550e8400-e29b-41d4-a716-446655440001",
     "dataValue": "HVAC-2024-001",
@@ -262,7 +262,7 @@ These fields are available for selection during node creation on the isCardUnder
     "componentType": "text"
   },
   {
-    "id": "field002",
+    "id": "660e8400-e29b-41d4-a716-446655440005",
     "fieldName": "Status",
     "parentNodeId": "550e8400-e29b-41d4-a716-446655440001",
     "dataValue": "In Service",
