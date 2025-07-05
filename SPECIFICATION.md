@@ -11,13 +11,6 @@ Asset maintenance management app for physical assets (vehicles, buildings, indus
 - **Mobile-First**: Vertical scrolling, single/double-tap interactions
 - **Offline-First Data**: Local-first with sync capabilities
 
-## Naming Conventions
-
-This specification uses consistent naming patterns for clarity:
-- **Components**: PascalCase (TreeNode, DataCard, DataField)
-- **States/Properties**: camelCase (isExpanded, nodeName, parentId)
-- **User-Facing Text**: In quotes ("Asset", "Create New Asset", "Add Field")
-
 ## Component Architecture
 
 ### Views
@@ -74,7 +67,7 @@ This specification uses consistent naming patterns for clarity:
 - **Add Data Field**: A "+" button at bottom of DataCard, expands an area with DataFields organized in categories, (similar to isCardUnderConstruction).
 - **Delete Data Field**: Expand the DataFieldMetadata to see a "Delete" button at the bottom of the section.
 - **Delete TreeNode**: Available in DataCard metadata section. Confirmation required. Deletes node and all children.
-- **Reorder on Data Card**: When a Data Field is active for editing, a small "drag handle" appears to the left of the row. The user can drag the row up or down to reorder the DataFields on the DataCard. (Implementation: Show drag handle when isEditing=true. Use HTML5 drag events for interaction. Only persist cardOrdering numbers to storage.)
+- **Reorder on Data Card**: When a Data Field is active for editing, a small "drag handle" appears to the left of the row. The user can drag the row up or down to reorder the DataFields on the DataCard. (Implementation: Show drag handle when isEditing=true. Use HTML5 drag events for interaction. Recalculate and persist cardOrdering numbers to storage.)
 
 ### Default DataFields ... Added and active for Value entry at node creation time, but entry not required.
 - **"Node Metadata"**: History and metadata for the node: createdBy, createdAt, updatedBy, updatedAt. (generated, non-optional)
